@@ -30,7 +30,6 @@ const ex = (id) => WORKOUT.exercises.find((e) => e.id === id);
 const EX_IDS = WORKOUT.exercises.map((e) => e.id);
 const ALL_STEPS = ['warmup'].concat(EX_IDS, ['cooldown']);
 const li = (a) => a.map((x) => `<li>${x}</li>`).join('');
-const fig = (name) => FIG[name] || '';
 
 const ICON = {
   back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -121,41 +120,22 @@ function musclesCard(m) {
     </div></div>`;
 }
 
-function figures(list, extra) {
-  const cells = list.map((f) => `<figure class="fig${f.bad ? ' bad' : ''}">${fig(f.fig)}
-    <figcaption><b>${f.t}</b>${f.c}</figcaption></figure>`).join('');
-  const one = list.length === 1 || list[0].wide;
-  let html = `<div class="figs${one ? ' one' : ''}">${cells}</div>`;
-  if (extra) html += `<figure class="fig">${fig(extra.fig)}</figure>
-    <p class="fignote">${extra.note}</p>`;
-  return html;
-}
-
-/* анимированная схема движения; если её нет — обычные стоп-кадры */
-function movement(e) {
-  const a = typeof ANIM !== 'undefined' ? ANIM[e.id] : null;
-  if (!a) return figures(e.figures, e.extraFig);
-  const s = e.figures[0], f = e.figures[1] || e.figures[0];
-  return `<figure class="fig anim">
-    <div class="fighead">
-      <b>Движение целиком</b>
-      <button class="btn ghost sm" data-act="anim">Пауза</button>
-    </div>
-    ${a}
-    <figcaption class="two">
-      <span><b>${s.t}</b> ${s.c}</span>
-      <span><b>${f.t}</b> ${f.c}</span>
-    </figcaption>
-  </figure>
-  ${e.extraFig ? `<figure class="fig">${fig(e.extraFig.fig)}</figure>
-    <p class="fignote">${e.extraFig.note}</p>` : ''}`;
+/* фотографии техники: крайние положения движения */
+function photos(list) {
+  if (!list || !list.length) return '';
+  const cells = list.map((p) => `<figure class="shot">
+    <img src="img/${p.src}.jpg" alt="${esc(p.t)}: ${esc(p.c)}" loading="lazy" decoding="async">
+    <figcaption><b>${p.t}</b>${p.c}</figcaption>
+  </figure>`).join('');
+  return `<div class="shots">${cells}</div>
+    <p class="credit">${WORKOUT.photoCredit}</p>`;
 }
 
 /* видео с техникой: плеер грузится только по нажатию */
-function videoBlock(id) {
-  const v = (WORKOUT.videos || {})[id];
+function videoBlock(v, title) {
+  if (typeof v === 'string') v = (WORKOUT.videos || {})[v];
   if (!v) return '';
-  return `<div class="card"><h3>Видео с техникой</h3>
+  return `<div class="card"><h3>${title || 'Видео с техникой'}</h3>
     <button class="yt" data-act="yt" data-id="${v.id}" aria-label="Смотреть видео: ${esc(v.t)}">
       <img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" loading="lazy"
         onerror="this.closest('.yt').classList.add('noimg')">
@@ -166,6 +146,7 @@ function videoBlock(id) {
       <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Открыть на YouTube ↗</a>
       <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}" target="_blank" rel="noopener">Другие видео ↗</a>
     </div>
+    ${v.warn ? `<p class="credit" style="text-align:left;margin-top:10px">${v.warn}</p>` : ''}
   </div>`;
 }
 
@@ -282,7 +263,7 @@ function viewExercise(id) {
     ⏱ Запустить отдых ${e.rest}
   </button>
 
-  ${movement(e)}
+  ${photos(e.photos)}
 
   ${videoBlock(e.id)}
 
@@ -300,8 +281,6 @@ function viewExercise(id) {
 
   <div class="card"><h3>Как понять, что вес слишком тяжёлый</h3><ul class="crosses">${li(e.heavy)}</ul></div>
 
-  ${e.badFigures ? figures(e.badFigures.map((f) => Object.assign({ bad: true }, f))) : ''}
-
   <div class="kv">
     <div><em>Дыхание</em><b>${e.breath}</b></div>
     <div><em>Темп движения</em><b>${e.tempoText}</b></div>
@@ -310,8 +289,8 @@ function viewExercise(id) {
   </div>
 
   <div class="card"><h3>Если оборудование занято</h3>
-    ${e.swaps.map((s) => `<div class="swap">
-      <div class="sfig">${fig(s.fig)}</div>
+    ${e.swaps.map((s) => `<div class="swap${s.img ? '' : ' noimg'}">
+      ${s.img ? `<img src="img/${s.img}.jpg" alt="${esc(s.name)}" loading="lazy" decoding="async">` : ''}
       <div><b>${s.name}</b><span>${s.note}</span></div>
     </div>`).join('')}
     ${e.swapExtra ? `<p style="margin-top:12px;font-size:13.5px;color:var(--tx-2)">${e.swapExtra}</p>` : ''}
@@ -344,14 +323,13 @@ function viewWarmup() {
   return `
   <div class="exhead"><div class="kicker">Шаг 0 · ${w.total}</div><h1>Разминка</h1></div>
 
-  <div class="card"><h3>${w.cardio.title}</h3>
-    <figure class="fig" style="margin-bottom:12px">${fig(w.cardio.fig)}</figure>
-    <p>${w.cardio.text}</p>
-  </div>
+  ${videoBlock(w.video, 'Видео: как размяться')}
 
-  <div class="figs">
-    ${w.blocks.map((b) => `<figure class="fig">${fig(b.fig)}
-      <figcaption><b>${b.title}</b>${b.text}</figcaption></figure>`).join('')}
+  <div class="card"><h3>${w.cardio.title}</h3><p>${w.cardio.text}</p></div>
+
+  <div class="card"><h3>Динамическая подготовка</h3>
+    ${w.blocks.map((b) => `<div style="margin-bottom:12px"><b>${b.title}</b><br>
+      <span style="color:var(--tx-2);font-size:14.5px">${b.text}</span></div>`).join('')}
   </div>
 
   <div class="card"><h3>Дополнительно</h3><ul class="ticks">${li(w.extra)}</ul></div>
@@ -592,14 +570,6 @@ function route() {
   $('#tbTitle').innerHTML = `${title}<span class="tb-sub">${sub}</span>`;
   $('#backBtn').style.visibility = (parts.length ? 'visible' : 'hidden');
   window.scrollTo(0, 0);
-
-  /* уважаем системную настройку «меньше движения» */
-  const svg = $('.fig.anim svg'), btn = $('.fig.anim [data-act="anim"]');
-  if (svg && svg.pauseAnimations && window.matchMedia &&
-      matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    svg.pauseAnimations();
-    if (btn) btn.textContent = 'Играть';
-  }
 }
 
 /* ---------------- события ---------------- */
@@ -614,12 +584,6 @@ document.addEventListener('click', (ev) => {
   }
   if (act === 'rest') {
     startTimer(parseInt(t.dataset.sec, 10), t.dataset.label);
-  }
-  if (act === 'anim') {
-    const svg = t.closest('figure').querySelector('svg');
-    if (!svg || !svg.pauseAnimations) return;
-    if (svg.animationsPaused()) { svg.unpauseAnimations(); t.textContent = 'Пауза'; }
-    else { svg.pauseAnimations(); t.textContent = 'Играть'; }
   }
   if (act === 'yt') {
     const id = t.dataset.id;

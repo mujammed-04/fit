@@ -25,11 +25,6 @@
   --tx-2: #AEB6C2;
   --tx-3: #767F8C;
 
-  --fg-body: #EDF0F4;
-  --fg-far: #6C7482;
-  --fg-gear: #79828F;
-  --fg-gear2: #98A2B0;
-  --fg-floor: #333B47;
   --fig-bg: #12161C;
   --muscle-base: #39414D;
   --muscle-1: var(--accent);
@@ -52,11 +47,6 @@ html[data-theme="light"] {
   --tx-2: #4C5563;
   --tx-3: #7C8593;
 
-  --fg-body: #171B22;
-  --fg-far: #A9B1BC;
-  --fg-gear: #8A929E;
-  --fg-gear2: #6E7783;
-  --fg-floor: #D2D8E1;
   --fig-bg: #F4F6F9;
   --muscle-base: #D5DAE2;
   --muscle-2: #FFC7AC;
@@ -225,36 +215,21 @@ button { font: inherit; color: inherit; }
 .plancell.hi { background: var(--accent-soft); border-color: transparent; }
 .plancell.hi b { color: var(--accent); }
 
-/* ---------- Иллюстрации ---------- */
-/* на телефоне схемы идут в одну колонку — иначе техника нечитаема */
-.figs { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0; }
-@media (min-width: 560px) { .figs { grid-template-columns: 1fr 1fr; } }
-.figs.one, .figs.one-col { grid-template-columns: 1fr !important; }
-.fig {
-  background: var(--fig-bg); border: 1px solid var(--line); border-radius: var(--r);
-  padding: 8px 8px 0; overflow: hidden;
+/* ---------- Фотографии техники ---------- */
+/* на телефоне — одна колонка: по маленькому фото технику не разобрать */
+.shots { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0 0; }
+@media (min-width: 620px) { .shots { grid-template-columns: 1fr 1fr; gap: 12px; } }
+.shot {
+  margin: 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden;
 }
-.fig svg { width: 100%; height: auto; display: block; }
-.fig figcaption {
-  padding: 8px 10px 12px; font-size: 13.5px; color: var(--tx-2); text-align: center;
-  line-height: 1.4;
+.shot img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: var(--surface-2); }
+.shot figcaption { padding: 11px 13px 13px; font-size: 14px; color: var(--tx-2); line-height: 1.4; }
+.shot figcaption b {
+  display: block; font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 3px;
 }
-.fig figcaption b { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 3px; }
-.fig.bad figcaption b { color: var(--danger); }
-.fignote { font-size: 12.5px; color: var(--tx-3); margin: -4px 0 12px; text-align: center; }
-
-/* анимированная схема */
-.fig.anim { padding-top: 0; }
-.fighead {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 10px 4px 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
-}
-.fighead b { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-3); }
-.fig figcaption.two { display: grid; gap: 8px; text-align: left; padding: 10px 6px 12px; }
-.fig figcaption.two span { display: block; }
-.fig figcaption.two b { display: inline-block; margin: 0 6px 0 0; }
-@media (min-width: 560px) { .fig figcaption.two { grid-template-columns: 1fr 1fr; gap: 14px; } }
+.credit { font-size: 11.5px; color: var(--tx-3); margin: 8px 2px 0; text-align: right; }
 
 /* видео */
 .yt {
@@ -280,26 +255,6 @@ button { font: inherit; color: inherit; }
 .ytmeta b { display: block; font-size: 14.5px; line-height: 1.35; }
 .ytmeta span { font-size: 12.5px; color: var(--tx-3); }
 .ytlinks { display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 2px 0; font-size: 13.5px; font-weight: 600; }
-
-/* ---------- Элементы схем ---------- */
-.f-limb { fill: none; stroke: var(--fg-body); stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; }
-.f-far { stroke: var(--fg-far); }
-.f-spine { fill: none; stroke: var(--fg-body); stroke-width: 26; stroke-linecap: round; }
-.f-bar { stroke: var(--fg-body); stroke-width: 20; stroke-linecap: round; }
-.f-neck { stroke: var(--fg-body); stroke-width: 13; stroke-linecap: round; }
-.f-head { fill: var(--fg-body); }
-.f-gear { fill: none; stroke: var(--fg-gear); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
-.f-gear-fill { fill: var(--fg-gear); }
-.f-plate { stroke: var(--fig-bg); stroke-width: 2.5; }
-.f-cable { stroke: var(--fg-gear2); stroke-width: 3.5; stroke-linecap: round; }
-.f-floor { stroke: var(--fg-floor); stroke-width: 6; stroke-linecap: round; }
-.f-db { fill: var(--fg-gear2); }
-.f-arrow { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; marker-end: url(#arw); }
-.f-dash { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 8 6; opacity: .85; }
-.f-badline { fill: none; stroke: var(--danger); stroke-width: 3; stroke-dasharray: 8 6; }
-.f-angle { fill: none; stroke: var(--accent); stroke-width: 3; }
-.f-lbl { font: 700 12px -apple-system, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
-  fill: var(--tx-3); letter-spacing: .01em; }
 
 /* ---------- Мышцы ---------- */
 .muscles { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: center; }
@@ -363,11 +318,11 @@ ul.crosses li::before {
 .kv b { font-size: 14.5px; font-weight: 600; color: var(--tx); }
 
 /* ---------- Замены ---------- */
-.swap { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center;
+.swap { display: grid; grid-template-columns: 108px 1fr; gap: 12px; align-items: start;
   padding: 12px; border-radius: var(--r-sm); background: var(--surface-2); margin-bottom: 10px; }
 .swap:last-child { margin-bottom: 0; }
-.swap .sfig { background: var(--fig-bg); border-radius: 10px; padding: 4px; }
-.swap .sfig svg { width: 100%; height: auto; display: block; }
+.swap.noimg { grid-template-columns: 1fr; }
+.swap img { width: 108px; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 9px; display: block; }
 .swap b { display: block; font-size: 14.5px; margin-bottom: 3px; }
 .swap span { font-size: 13px; color: var(--tx-2); line-height: 1.4; display: block; }
 
@@ -463,7 +418,6 @@ input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 
 .anchor-list a i { font-style: normal; color: var(--tx-3); font-weight: 600; font-size: 13px; }
 
 @media (min-width: 620px) {
-  .figs { gap: 14px; }
   .tiles { grid-template-columns: repeat(3, 1fr); }
 }
 
