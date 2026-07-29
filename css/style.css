@@ -244,6 +244,43 @@ button { font: inherit; color: inherit; }
 .fig.bad figcaption b { color: var(--danger); }
 .fignote { font-size: 12.5px; color: var(--tx-3); margin: -4px 0 12px; text-align: center; }
 
+/* анимированная схема */
+.fig.anim { padding-top: 0; }
+.fighead {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 4px 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+}
+.fighead b { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-3); }
+.fig figcaption.two { display: grid; gap: 8px; text-align: left; padding: 10px 6px 12px; }
+.fig figcaption.two span { display: block; }
+.fig figcaption.two b { display: inline-block; margin: 0 6px 0 0; }
+@media (min-width: 560px) { .fig figcaption.two { grid-template-columns: 1fr 1fr; gap: 14px; } }
+
+/* видео */
+.yt {
+  display: block; width: 100%; padding: 0; border: 0; border-radius: var(--r-sm);
+  overflow: hidden; position: relative; aspect-ratio: 16 / 9; cursor: pointer;
+  background: #000; line-height: 0;
+}
+.yt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.yt.noimg { background: var(--surface-2); }
+.ytp {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 62px; height: 44px; border-radius: 12px; background: rgba(20, 0, 0, .75);
+  display: grid; place-items: center;
+}
+.ytp::after {
+  content: ""; width: 0; height: 0; margin-left: 3px;
+  border-left: 15px solid #fff; border-top: 9px solid transparent; border-bottom: 9px solid transparent;
+}
+.yt:active .ytp { background: #FF0033; }
+.ytframe { border-radius: var(--r-sm); overflow: hidden; aspect-ratio: 16 / 9; background: #000; }
+.ytframe iframe { width: 100%; height: 100%; border: 0; display: block; }
+.ytmeta { padding: 10px 2px 0; }
+.ytmeta b { display: block; font-size: 14.5px; line-height: 1.35; }
+.ytmeta span { font-size: 12.5px; color: var(--tx-3); }
+.ytlinks { display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 2px 0; font-size: 13.5px; font-weight: 600; }
+
 /* ---------- Элементы схем ---------- */
 .f-limb { fill: none; stroke: var(--fg-body); stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; }
 .f-far { stroke: var(--fg-far); }

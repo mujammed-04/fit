@@ -131,6 +131,44 @@ function figures(list, extra) {
   return html;
 }
 
+/* анимированная схема движения; если её нет — обычные стоп-кадры */
+function movement(e) {
+  const a = typeof ANIM !== 'undefined' ? ANIM[e.id] : null;
+  if (!a) return figures(e.figures, e.extraFig);
+  const s = e.figures[0], f = e.figures[1] || e.figures[0];
+  return `<figure class="fig anim">
+    <div class="fighead">
+      <b>Движение целиком</b>
+      <button class="btn ghost sm" data-act="anim">Пауза</button>
+    </div>
+    ${a}
+    <figcaption class="two">
+      <span><b>${s.t}</b> ${s.c}</span>
+      <span><b>${f.t}</b> ${f.c}</span>
+    </figcaption>
+  </figure>
+  ${e.extraFig ? `<figure class="fig">${fig(e.extraFig.fig)}</figure>
+    <p class="fignote">${e.extraFig.note}</p>` : ''}`;
+}
+
+/* видео с техникой: плеер грузится только по нажатию */
+function videoBlock(id) {
+  const v = (WORKOUT.videos || {})[id];
+  if (!v) return '';
+  return `<div class="card"><h3>Видео с техникой</h3>
+    <button class="yt" data-act="yt" data-id="${v.id}" aria-label="Смотреть видео: ${esc(v.t)}">
+      <img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" loading="lazy"
+        onerror="this.closest('.yt').classList.add('noimg')">
+      <span class="ytp" aria-hidden="true"></span>
+    </button>
+    <div class="ytmeta"><b>${v.t}</b><span>${v.a}</span></div>
+    <div class="ytlinks">
+      <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Открыть на YouTube ↗</a>
+      <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}" target="_blank" rel="noopener">Другие видео ↗</a>
+    </div>
+  </div>`;
+}
+
 /* ---------------- экран: главная ---------------- */
 function viewHome() {
   const doneCount = ALL_STEPS.filter((k) => S.done[k]).length;
@@ -244,7 +282,9 @@ function viewExercise(id) {
     ⏱ Запустить отдых ${e.rest}
   </button>
 
-  ${figures(e.figures, e.extraFig)}
+  ${movement(e)}
+
+  ${videoBlock(e.id)}
 
   <div class="card accent"><h3>Задача подхода</h3><p>${e.goal}</p></div>
 
@@ -552,6 +592,14 @@ function route() {
   $('#tbTitle').innerHTML = `${title}<span class="tb-sub">${sub}</span>`;
   $('#backBtn').style.visibility = (parts.length ? 'visible' : 'hidden');
   window.scrollTo(0, 0);
+
+  /* уважаем системную настройку «меньше движения» */
+  const svg = $('.fig.anim svg'), btn = $('.fig.anim [data-act="anim"]');
+  if (svg && svg.pauseAnimations && window.matchMedia &&
+      matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    svg.pauseAnimations();
+    if (btn) btn.textContent = 'Играть';
+  }
 }
 
 /* ---------------- события ---------------- */
@@ -566,6 +614,27 @@ document.addEventListener('click', (ev) => {
   }
   if (act === 'rest') {
     startTimer(parseInt(t.dataset.sec, 10), t.dataset.label);
+  }
+  if (act === 'anim') {
+    const svg = t.closest('figure').querySelector('svg');
+    if (!svg || !svg.pauseAnimations) return;
+    if (svg.animationsPaused()) { svg.unpauseAnimations(); t.textContent = 'Пауза'; }
+    else { svg.pauseAnimations(); t.textContent = 'Играть'; }
+  }
+  if (act === 'yt') {
+    const id = t.dataset.id;
+    if (location.protocol === 'file:') {
+      /* с локального файла YouTube отдаёт ошибку 153 — открываем в новой вкладке */
+      window.open('https://www.youtube.com/watch?v=' + id, '_blank', 'noopener');
+      return;
+    }
+    const box = document.createElement('div');
+    box.className = 'ytframe';
+    box.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + id +
+      '?autoplay=1&rel=0&modestbranding=1" title="Видео с техникой" loading="lazy" ' +
+      'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+      'referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    t.replaceWith(box);
   }
   if (act === 'timer-stop') stopTimer();
   if (act === 'timer-add') { timer.left += 30; timer.total += 30; if (!timer.id) startTimer(timer.left, timer.label); else paintTimer(); }

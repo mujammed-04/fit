@@ -278,7 +278,7 @@ const crLegs =
 
 FIG.crunch_start = F.svg('0 0 260 280',
   crRig + crLegs +
-  F.rope(50, 52, 124, 114) +
+  F.rope(50, 52, 116, 110) +
   F.head(138, 120, 15) + F.neck(142, 133, 146, 142) +
   F.spine('M154,196 L146,142') +
   F.limb('146,148 128,148 120,116', true) +
@@ -508,6 +508,130 @@ FIG.sub_kneeplank = F.svg('0 0 200 180',
   F.spine('M60,106 L126,122') +
   F.limb('126,124 156,140 178,132')
 );
+
+/* ==========================================================================
+   АНИМИРОВАННЫЕ СХЕМЫ ДВИЖЕНИЯ
+   Цикл: пауза в старте → движение → пауза в финише → возврат.
+   Сделано на SMIL, без JS и без внешних гифок: работает офлайн,
+   ставится на паузу кнопкой и не зависит от чужих файлов.
+   ========================================================================== */
+
+const A_DUR = '4s';
+const A_KT = '0;0.14;0.46;0.64;1';
+const A_KS = '0 0 1 1;.4 0 .2 1;0 0 1 1;.4 0 .2 1';
+
+const animAttr = (name, a, b, dur) =>
+  `<animate attributeName="${name}" values="${a};${a};${b};${b};${a}" dur="${dur || A_DUR}" ` +
+  `keyTimes="${A_KT}" calcMode="spline" keySplines="${A_KS}" repeatCount="indefinite"/>`;
+
+const animT = (type, a, b, dur) =>
+  `<animateTransform attributeName="transform" type="${type}" values="${a};${a};${b};${b};${a}" ` +
+  `dur="${dur || A_DUR}" keyTimes="${A_KT}" calcMode="spline" keySplines="${A_KS}" repeatCount="indefinite"/>`;
+
+/* гантель, которая едет вместе с кистью */
+F.dbAnim = (a, b, dur) => {
+  const plates = `<rect x="-14" y="-4" width="28" height="8" rx="4"/>` +
+    `<rect x="-21" y="-11" width="9" height="22" rx="4.5"/>` +
+    `<rect x="12" y="-11" width="9" height="22" rx="4.5"/>`;
+  const ra = a.r || 0, rb = b.r || 0;
+  return `<g class="f-db"><g transform="translate(${a.x},${a.y})">` +
+    animT('translate', `${a.x},${a.y}`, `${b.x},${b.y}`, dur) +
+    `<g transform="rotate(${ra})">` + (ra !== rb ? animT('rotate', String(ra), String(rb), dur) : '') +
+    plates + `</g></g></g>`;
+};
+
+/* сборка: неподвижная часть + дорожки «поза A → поза B» */
+function anim(vb, fixed, tracks, dur) {
+  const body = tracks.map((t) => {
+    if (t.db) return F.dbAnim(t.a, t.b, dur);
+    const [tag, cls] = t.el.split('.');
+    const A = t.a, B = t.b || t.a;
+    const attrs = Object.assign({}, t.fix || {}, A);
+    const head = Object.keys(attrs).map((k) => `${k}="${attrs[k]}"`).join(' ');
+    const anims = Object.keys(A)
+      .filter((k) => String(A[k]) !== String(B[k]))
+      .map((k) => animAttr(k, A[k], B[k], dur)).join('');
+    return `<${tag} class="${cls}" ${head}>${anims}</${tag}>`;
+  }).join('');
+  return F.svg(vb, fixed + body, 'class="pose pose-anim"');
+}
+
+const ANIM = {};
+
+/* --- подтягивания --- */
+ANIM.pullups = anim('0 0 240 300',
+  F.gear('M34,46 H206 M40,46 V20 M200,46 V20') + F.hand(86, 44) + F.hand(154, 44),
+  [
+    { el: 'polyline.f-limb', a: { points: '86,46 89,88 96,118' }, b: { points: '86,46 80,86 94,58' } },
+    { el: 'polyline.f-limb', a: { points: '154,46 151,88 144,118' }, b: { points: '154,46 160,86 146,58' } },
+    { el: 'circle.f-head', fix: { r: 17 }, a: { cx: 120, cy: 96 }, b: { cx: 120, cy: 24 } },
+    { el: 'line.f-neck', a: { x1: 120, y1: 108, x2: 120, y2: 120 }, b: { x1: 120, y1: 40, x2: 120, y2: 58 } },
+    { el: 'line.f-bar', a: { x1: 96, y1: 118, x2: 144, y2: 118 }, b: { x1: 94, y1: 58, x2: 146, y2: 58 } },
+    { el: 'path.f-spine', a: { d: 'M120,120 Q120,151 120,182' }, b: { d: 'M120,58 Q120,90 120,122' } },
+    { el: 'line.f-bar', a: { x1: 108, y1: 184, x2: 132, y2: 184 }, b: { x1: 108, y1: 124, x2: 132, y2: 124 } },
+    { el: 'polyline.f-limb', a: { points: '108,184 104,232 100,272' }, b: { points: '108,124 100,172 96,214' } },
+    { el: 'polyline.f-limb', a: { points: '132,184 136,232 140,272' }, b: { points: '132,124 140,172 144,214' } },
+  ]);
+
+/* --- жим гантелей лёжа --- */
+ANIM.bench = anim('0 0 280 260',
+  bench + benchBody,
+  [
+    { el: 'polyline.f-limb f-far', a: { points: '92,182 100,148 106,110' }, b: { points: '92,182 82,192 106,158' } },
+    { el: 'polyline.f-limb', a: { points: '92,176 98,142 104,102' }, b: { points: '92,176 76,188 100,152' } },
+    { db: true, a: { x: 104, y: 96 }, b: { x: 100, y: 146 } },
+  ]);
+
+/* --- горизонтальная тяга --- */
+ANIM.row = anim('0 0 280 280',
+  rowRig,
+  [
+    { el: 'line.f-cable', a: { x1: 46, y1: 212, x2: 80, y2: 180 }, b: { x1: 46, y1: 212, x2: 128, y2: 182 } },
+    { el: 'circle.f-head', fix: { r: 15 }, a: { cx: 132, cy: 128 }, b: { cx: 140, cy: 126 } },
+    { el: 'line.f-neck', a: { x1: 136, y1: 141, x2: 140, y2: 150 }, b: { x1: 143, y1: 139, x2: 146, y2: 148 } },
+    { el: 'path.f-spine', a: { d: 'M152,204 Q146,177 140,150' }, b: { d: 'M152,204 Q149,175 146,146' } },
+    { el: 'polyline.f-limb f-far', a: { points: '140,156 110,168 82,180' }, b: { points: '146,154 162,182 130,186' } },
+    { el: 'polyline.f-limb', a: { points: '140,150 110,166 80,180' }, b: { points: '146,148 161,178 128,182' } },
+    { el: 'circle.f-head', fix: { r: 8 }, a: { cx: 78, cy: 180 }, b: { cx: 126, cy: 182 } },
+    { el: 'polyline.f-limb f-far', a: { points: '152,206 104,206 78,226' } },
+    { el: 'polyline.f-limb', a: { points: '152,206 106,204 80,224' } },
+  ]);
+
+/* --- разведения гантелей --- */
+ANIM.lateral = anim('0 0 280 290',
+  lrBody,
+  [
+    { el: 'polyline.f-limb', a: { points: '114,72 104,114 108,156' }, b: { points: '114,72 72,80 36,74' } },
+    { el: 'polyline.f-limb', a: { points: '166,72 176,114 172,156' }, b: { points: '166,72 208,80 244,74' } },
+    { db: true, a: { x: 108, y: 168, r: 90 }, b: { x: 32, y: 74, r: -4 } },
+    { db: true, a: { x: 172, y: 168, r: 90 }, b: { x: 248, y: 74, r: 4 } },
+  ]);
+
+/* --- face pull --- */
+ANIM.facepull = anim('0 0 280 280',
+  fpRig + F.head(160, 96, 15) + F.neck(163, 109, 166, 118) + F.spine('M176,184 L166,118') + fpLegs,
+  [
+    { el: 'line.f-cable', a: { x1: 50, y1: 56, x2: 92, y2: 92 }, b: { x1: 50, y1: 56, x2: 150, y2: 78 } },
+    { el: 'polyline.f-limb f-far', a: { points: '170,122 132,110 96,96' }, b: { points: '170,122 192,104 156,84' } },
+    { el: 'polyline.f-limb', a: { points: '166,116 128,104 92,92' }, b: { points: '166,116 188,100 150,78' } },
+    { el: 'circle.f-head', fix: { r: 8 }, a: { cx: 90, cy: 91 }, b: { cx: 148, cy: 77 } },
+  ]);
+
+/* --- скручивания на блоке --- */
+ANIM.crunch = anim('0 0 260 280',
+  crRig + crLegs,
+  [
+    { el: 'line.f-cable', a: { x1: 50, y1: 52, x2: 116, y2: 110 }, b: { x1: 50, y1: 52, x2: 110, y2: 136 } },
+    { el: 'circle.f-head', fix: { r: 15 }, a: { cx: 138, cy: 120 }, b: { cx: 122, cy: 142 } },
+    { el: 'line.f-neck', a: { x1: 142, y1: 133, x2: 146, y2: 142 }, b: { x1: 128, y1: 152, x2: 134, y2: 154 } },
+    { el: 'path.f-spine', a: { d: 'M154,196 Q150,169 146,142' }, b: { d: 'M154,196 Q154,164 138,152' } },
+    { el: 'polyline.f-limb f-far', a: { points: '146,148 128,148 120,116' }, b: { points: '138,158 122,172 114,142' } },
+    { el: 'polyline.f-limb', a: { points: '146,142 126,144 116,110' }, b: { points: '138,152 120,166 110,136' } },
+    { el: 'circle.f-head', fix: { r: 8 }, a: { cx: 114, cy: 109 }, b: { cx: 108, cy: 135 } },
+  ]);
+
+/* --- планка: движения нет, но показываем «дыши и держи линию» --- */
+ANIM.plank = null;
 
 /* ==========================================================================
    КАРТА МЫШЦ
