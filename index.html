@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренировка A · День 1 — верх тела и пресс</title>
+<meta name="description" content="Пошаговое руководство по тренировке A: техника, схемы, ошибки, выбор веса, замены упражнений и трекер подходов.">
+<meta name="theme-color" content="#0B0D11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Тренировка A">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- общие определения для схем (стрелки) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <marker id="arw" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#FF5A1F"/>
+  </marker>
+</defs></svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="iconbtn" id="backBtn" data-act="back" aria-label="Назад">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="tb-title" id="tbTitle">Тренировка A<span class="tb-sub">День 1</span></div>
+    <a class="iconbtn" href="#/" aria-label="На главную">
+      <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>
+    </a>
+    <button class="iconbtn" id="themeBtn" data-act="theme" aria-label="Сменить тему"></button>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<div class="timerbar" id="timerbar">
+  <div class="timerbar-in">
+    <div class="tval" id="tval">0:00</div>
+    <div class="tinfo" id="tinfo"></div>
+    <button class="btn ghost sm" data-act="timer-add">+30с</button>
+    <button class="btn sm" data-act="timer-stop">Готово</button>
+  </div>
+</div>
+
+<script src="js/figures.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
